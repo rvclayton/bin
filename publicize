@@ -1,0 +1,46 @@
+#! /bin/bash
+#
+# publicise - make a bunch of files publically accessable (readable by all,
+# writable by none).  If a file is directory, that directory and everything it
+# contains is publicised.
+#
+
+cmdline='name...'
+source ~rclayton/bin/shell-utils
+
+function publify {
+
+  chmod ugo+r,ugo-w "$1"
+  [ -x "$1" ] && chmod ugo+x "$1"
+
+  if [ -d "$1" ] ; then
+    chmod u+w "$1"
+    (cd "$1" ; ls | while read i ; do publify "$i" ; done)
+  fi
+  }
+
+
+if (( $# < 1 )) ; then 
+  badcmd "Missing file or directory names"
+fi
+
+while (( $# > 0 )) ; do
+  if [ -r "$1" ] ; then
+    publify "$1"
+  else
+    emsg "Can't find $1"
+  fi
+  shift 1
+done
+
+# $Log: publicize,v $
+# Revision 1.2  2010/08/13 01:33:35  rclayton
+# Replace "for i in $(ls)" with "ls | while read i" to avoid space in filename
+# problems.
+#
+# Revision 1.1  2010/03/03 18:37:15  rclayton
+# Publicize one or more files at a time.
+#
+# Revision 1.2  2004/11/14 03:56:46  rclayton
+# Switch from ksh to bash.
+#
