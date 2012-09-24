@@ -1,0 +1,22 @@
+#! /bin/bash
+#
+# rcslocked - print locked files.
+
+if   [ $# -ne 0 ]
+then echo 1>&2 "Command format is: \"`basename $0`\"."
+     exit 1
+fi
+
+if   [ -d RCS ]
+then for i in `rlog -R -L RCS/*`
+     do echo `basename $i ,v`
+     done
+fi
+
+# $Log: rcslocked,v $
+# Revision 1.1.1.1  2006-01-08 19:56:44  rclayton
+# Created
+#
+# Revision 1.2  2004/11/14 03:56:46  rclayton
+# Switch from ksh to bash.
+#

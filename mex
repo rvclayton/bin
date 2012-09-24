@@ -1,0 +1,21 @@
+#! /bin/bash
+#
+# mex - set execution bits.
+
+if   [ $# -lt 1 ]
+then echo 2>&1 "Command format is \"`basename $0` <file>...\""
+     exit 1
+fi
+
+chmod a+x $*
+
+# $Log: mex,v $
+# Revision 1.1.1.1  2006-01-08 19:56:44  rclayton
+# Created
+#
+# Revision 1.1.1.1  2004/11/13 21:37:55  rclayton
+# Created.
+#
+# Revision 1.1  2004/11/06 19:12:11  rclayton
+# Created.
+#

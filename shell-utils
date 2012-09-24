@@ -1,0 +1,66 @@
+#! /bin/bash
+
+
+# The cmdline shell variable contains the command-line summary (minus the
+# command name) of the command including this file. cmdline should be defined
+# elsewhere (most likely in the including file).
+
+
+progname=`basename $0`
+
+
+function badcmd {
+
+  # Print an error message about command format, optionally preceeded by the
+  # explanation message $1; then exit with 1.
+
+  [ "x$1" != "x" ] && emsg "$1"
+
+  cmdline=$(echo $cmdline | sed 's/^[ 	][ 	]*//')
+  [ "$cmdline" ] && cmdline=" $cmdline"
+
+  oops "The command format is \"$progname$cmdline\""
+  }
+
+
+function emsg {
+
+  # Print the error message $1 to std-err.
+
+  local dot=''
+  if [ "x$1" != "x" ] ; then 
+    expr "$1" : '.*\.$' 1>/dev/null 2>&1 || dot='.'
+  fi
+
+  echo 1>&2 "$1$dot"
+  }
+
+
+function oops {
+
+  # Print the error message $1 to std-err and exit with 1.
+
+  emsg "$1"
+  exit 1
+  }
+
+
+ERRCOLOR='[1;31m'  # The error color.
+WARCOLOR='[0;33m'  # The warning color.
+COPCOLOR='[0;32m'  # The copacetic color.
+ENDCOLOR='[0m'
+
+
+# $Log: shell-utils,v $
+# Revision 1.1  2011/10/04 15:40:35  rclayton
+# add text colors, and an implicit promise never to use them.
+#
+# Revision 1.3  2006-05-16 14:03:54  rclayton
+# Updated.
+#
+# Revision 1.2  2006-02-28 19:20:38  rclayton
+# Handle empty command lines correctly.
+#
+# Revision 1.1  2005/11/20 21:12:17  rclayton
+# Created.
+#

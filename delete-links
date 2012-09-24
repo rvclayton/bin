@@ -1,0 +1,182 @@
+#! /bin/bash
+
+
+pgmname=`basename $0`
+
+
+function doit {
+
+  # If the environment variable practice is null, execute the command $1;
+  # otherwise print $1 to std-err.
+
+  if [ "$practice" ] 
+  then emsg "$*"
+  else eval "$*"
+  fi
+  }
+
+
+function emsg {
+
+  # Print the message $1 to std-err.
+
+  echo 1>&2 "$1"
+  }
+
+
+function comment {
+
+  # Print the comment $2 at level $1.
+
+  emsg "$2"
+  }
+
+
+function do_file {
+
+  # Delete the file ./$2 from the directory $1.
+
+  if [ -f "$1/$2" ] ; then
+    if `cmp -s $2 $1/$2` ; then
+      doit chmod u+w $1/$2
+      doit rm -f $1/$2
+    else
+      comment 0 "$1/$2 exists and differs from $2, $2 not deleted."
+    fi
+  else
+    comment 0 "$1/$2 does not exist."
+  fi
+  }
+
+
+function do_dir {
+
+  # Delete the directory ./$2 from the directory $1; if $1/$2 is empty, delete
+  # it too.
+
+  if [ -d "$1/$2" ] ; then
+    cd $2
+    do_files $1/$2
+    cd ..
+    [ "`ls $1/$2`" ] || doit rmdir $1/$2
+  elif [ -f $1/$2 ] ; then
+    comment 0 "$1/$2 exists and is not a directory; $2 not deleted."
+  fi
+  }
+
+
+function do_files {
+
+  # Delete all the files in the current directory from the target directory $1.
+
+  for f in * ; do
+    if [ "$f" = '*' ] ; then
+      :
+    elif [ -f $f ] ; then
+      do_file $1 $f
+    elif [ -d $f ] ; then
+      do_dir $1 $f
+    else
+      comment 0 "$f isn't a file or directory"
+    fi
+  done
+  }
+
+
+function do_pkg {
+
+  # Delete the files under the package $1 from the target directory $2.
+
+  cd $1
+
+  for f in * ; do
+    if [ -f $f ] ; then
+      comment 0 "non-directory file $f under package $1"
+    elif [ -d $f ] ; then
+      do_dir $2 $f
+    else
+      comment 0 "$f isn't a file or directory"
+    fi
+  done
+
+  cd ..
+  }
+
+
+function oops {
+
+  # Print $1 to std-err and die.
+
+  emsg "$1."
+  exit 1
+  }
+
+
+function badcmd {
+
+  # Print the bad command message and die.
+
+  oops "Command format is \"$pgmname [-p] [-t target-dir] pkg-name\""
+  }
+
+
+[ $# -lt 1 ] && badcmd
+
+if [ $(whoami) == "root" ] ; then
+  tgt_dir=/usr/local
+else
+  tgt_dir=$HOME/local
+fi
+
+pkg=''
+practice=''
+force=''
+
+while [ $# -gt 0 ] ; do
+  case $1 in
+    -t*)  tgt_dir=`expr $1 : '-t\(.*\)'`
+	  if [ ! "$tgt_dir" ] ; then
+	    shift 1
+	    tgt_dir=$1
+	  fi
+	  [ "$tgt_dir" ] || oops '-t needs an argument'
+	  ;;
+
+    -p)	  practice=1
+	  ;;
+
+    -f)	  force=1
+	  ;;
+
+    -*)	  oops "$1 is an unrecognized option"
+	  badcmd
+	  ;;
+
+    *)	  [ "$pkg" ] && oops "Can only specify one package"
+	  pkg=$1
+	  ;;
+  esac
+
+  shift 1
+
+done
+
+[ ! "$pkg" ] && (emsg "No package specified." ; badcmd)
+
+[ -d "$pkg" ] || oops "Can't find the package directory $pkg"
+[ -d "$tgt_dir" ] || oops "Can't find the installation directory $tgt_dir"
+
+do_pkg $pkg $tgt_dir
+
+
+# $Log: delete-links,v $
+# Revision 1.2  2006-06-17 19:56:11  rclayton
+# Make sure files to be deleted are writable.
+#
+# Revision 1.1.1.1  2006-01-08 19:56:44  rclayton
+# Created
+#
+# Revision 1.2  2004/11/28 22:14:05  rclayton
+# Use /bin/bash, not /usr/bin/bash; set the target directory based on the
+# root status of the user.
+#

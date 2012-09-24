@@ -1,0 +1,30 @@
+#! /bin/bash
+#
+# where - find the location of a file in the path.
+
+opath=$PATH
+
+case $# in
+     0)	echo 'form:  where filename' 1>&2; exit 2
+     esac
+
+for i in `echo $opath | sed 's/^:/.:/
+			     s/::/:.:/g
+			     s/:$/:./
+			     s/:/ /g'`
+
+do if   [ -x $i/$1 -a ! -d $i/$1 ]
+   then echo $i/$1
+   fi
+done
+
+# $Log: where,v $
+# Revision 1.1.1.1  2006-01-08 19:56:44  rclayton
+# Created
+#
+# Revision 1.1.1.1  2004/11/13 21:37:55  rclayton
+# Created.
+#
+# Revision 1.1  2004/11/06 19:12:11  rclayton
+# Created.
+#

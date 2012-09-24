@@ -1,0 +1,24 @@
+#! /bin/bash
+
+if   [ $# -ne 0 ]
+then echo 1>&2 "Command format is \"`basename $0`\"."
+     exit 1
+fi
+
+/bin/rm -f \#* .*~ *~ core *.log *.dlog *.output *.ba[ck] *.blg *.cob \
+           .*.BAK *.BAK .\#* core.[0-9]*
+
+
+# $Log: crm,v $
+# Revision 1.1.1.1  2006-01-08 19:56:44  rclayton
+# Created
+#
+# Revision 1.2  2005/05/11 21:29:10  rclayton
+# Don't delete *.list files (don't trash sources.list).
+#
+# Revision 1.1.1.1  2004/11/13 21:37:55  rclayton
+# Created.
+#
+# Revision 1.1  2004/11/06 19:12:11  rclayton
+# Created.
+#
