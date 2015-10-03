@@ -28,11 +28,21 @@ function emsg {
   # Print the error message $1 to std-err.
 
   local dot=''
-  if [ "x$1" != "x" ] ; then 
-    expr "$1" : '.*\.$' 1>/dev/null 2>&1 || dot='.'
+  if [ -n "$1" ] ; then 
+    expr "$1" : '.*[.?!]$' 1>/dev/null 2>&1 || dot='.'
   fi
 
-  echo 1>&2 "$1$dot"
+  local em="$1$dot"
+
+  # Look for a command that interprets escaped characters.
+  
+  if [ -z "$(echo -e) 2>/dev/null" ] ; then
+    echo -e "$em\n"
+  elif [ -n "$(printf "hi" 2>/dev/null)" ] ; then
+    printf "$em\n"
+  else
+    echo "$em"
+  fi 1>&2      
   }
 
 
